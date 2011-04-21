@@ -37,8 +37,9 @@ Print help information and exit.
 .B Hashdup
 exits 0 on success, and >0 if an error occurs.
 .SH MEMORY USAGE
-Since the hashes are read into an associative array (Judy), the RAM
-requirements may easily exceed two times the size of the largest of
+The processed files are mapped into memory one by one for in-memory
+sorting.  Other than that, no significant amount of memory is allocated.
+Thus, the RAM requirements correspond to the size of the largest of
 the input files.  The memory usage can be reduced by splitting the input
 into more files with
 .BR hashgen (1).
