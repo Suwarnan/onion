@@ -1,0 +1,49 @@
+.TH HASHDUP 1
+.SH NAME
+hashdup \- identify duplicate hashes
+.SH SYNOPSIS
+.B hashdup
+.RI [ OPTIONS ]
+.I FILE
+.RI [ FILE ...]
+.SH DESCRIPTION
+.B Hashdup
+reads the input
+.IR FILE (s)
+containing 64-bit hashes and sends to output only the hashes with two or more
+occurences.  Only one instance of each hash is sent to output.  The input
+.IR FILE (s)
+are processed one by one.  It is assumed that the each of the
+.IR FILE (s)
+contains different hashes.
+.PP
+.B Hashdup
+is designed for processing the output of
+.BR hashgen (1).
+.SH OPTIONS
+.TP
+.BI \-o " STR"
+The name of the output file
+.TP
+.B \-q
+Quiet; do not print any progress information to standard error output.
+.TP
+.B \-V
+Print version information and exit.
+.TP
+.B \-h
+Print help information and exit.
+.SH EXIT STATUS
+.B Hashdup
+exits 0 on success, and >0 if an error occurs.
+.SH MEMORY USAGE
+Since the hashes are read into an associative array (Judy), the RAM
+requirements may easily exceed two times the size of the largest of
+the input files.  The memory usage can be reduced by splitting the input
+into more files with
+.BR hashgen (1).
+.SH SEE ALSO
+.BR hashgen (1),
+.BR onion (1)
+.SH AUTHOR
+Jan Pomikalek <jan.pomikalek@gmail.com>

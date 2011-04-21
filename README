@@ -1,0 +1,24 @@
+onion -- One Instance Only
+==========================
+
+Prerequisites:
+    64-bit CPU architecture
+    libjudy (>=1.0.5) <http://judy.sourceforge.net/>
+
+To install the package:
+    1. edit Makefile.config:
+        - set PREFIX (or INSTALL_BIN and INSTALL_DATA) according to where you
+          want the executables and data installed
+        - if you have libjudy installed in a non-standard path you need to:
+            - set JUDY_INC to where Judy.h is located
+            - set JUDY_LIB to where libJudy.a is located
+    2. type:
+        make
+        make install
+
+For usage information see:
+    onion -h
+    man onion
+
+Project home page:
+    <http://code.google.com/p/onion/>

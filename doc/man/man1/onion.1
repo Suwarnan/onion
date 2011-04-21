@@ -1,0 +1,145 @@
+.TH ONION 1
+.SH NAME
+onion \- mark duplicate text parts in the input
+.SH SYNOPSIS
+.B onion
+.RI [ OPTIONS ]
+.RI [ FILE ]
+.SH DESCRIPTION
+.B Onion
+looks for duplicate text content in the named input
+.I FILE
+(or standard input if no files are named, or the file name
+.B \-
+is given).
+By default, all but the first instances of the
+duplicate parts are marked by prefixing the lines with
+.B 1
+and a
+.BR tab .
+All other lines are prefixed with
+.B 0
+and a
+.BR tab .
+The output is written to standard output.
+.PP
+The duplicate parts are identified by matching against previously seen
+tuples (n-grams) of tokens.  Paragraphs which contain too many duplicate
+tokens are marked as duplicated.  Also, short interleaving (non-duplicate)
+paragraphs are marked as duplicated during the smoothing stage.
+.SH OPTIONS
+.TP
+.BI \-f " FILE"
+Read hashes of precomputed duplicate n-grams from the
+.IR FILE .
+This typically reduces the memory requirements to ca 10% (recommended for
+processing input of a size close to or larger than available RAM).
+Duplicate n-grams can be precomputed using the
+.BR hashgen (1)
+and
+.BR hashdup (1)
+commands.
+.TP
+.BI \-n " NUM"
+The number of tokens in each tuple used for matching near-duplicate
+text parts.  Longer tuples match fewer coincidental repetitions, but may fail
+to detect near-duplicates with a high number of modifications (higher
+precision, lower recall).  Recommended value is between 5 and 10.
+.TP
+.BI \-t " NUM"
+The minimal ratio of duplicated tokens for a paragraph to be marked
+as duplicated.  A valid value is between 0 and 1.
+.TP
+.BI \-d " STR"
+The name of a tag which marks document boundaries.
+.TP
+.BI \-p " STR"
+The name of a tag which marks paragraph boundaries.  Can be set to the name
+of the document tag to force de-duplication on document level.
+.TP
+.B \-s
+Strip duplicated parts.  The paragraphs which would
+otherwise be marked as duplicated are removed from the output.  
+Non-duplicated paragraphs are sent to output unchanged (no zero prefix).
+.TP
+.B \-m
+Disable smoothing.  By default, stubs--short (non-duplicated) paragraphs
+between two duplicated paragraphs or between a duplicated paragraph and a
+document start/end--are also marked as duplicated.  The
+.B \-m
+option disables this.
+.TP
+.BI \-l " NUM"
+The maximal length of a stub (in tokens).  This is the maximal
+length of a continuous sequence of paragraphs which can be removed as
+a stub during smoothing.  This option has no effect with
+.BR \-m .
+.TP
+.BI \-b " NUM"
+Buffer size (in bytes).  The size of a block processed in each iteration.
+Must be larger than the largest document in the input.  The program ends
+with an error if a document which does not fit into the buffer is
+encountered.  Beware that the program allocates roughly 20 times buffer
+size RAM for auxiliary data structures.
+.TP
+.B \-q
+Quiet; do not print any progress information to standard error output.
+.TP
+.B \-V
+Print version information and exit.
+.TP
+.B \-h
+Print help information and exit.
+.SH EXIT STATUS
+.B Onion
+exits 0 on success, and >0 if an error occurs.
+.SH MEMORY USAGE
+Apart from fixed size data structures (see
+.BR \-b )
+the program also uses variable size data structures for storing hashes
+of seen n-grams.  As the input is processed, the hashes of n-grams of
+non-duplicated paragraphs are stored in a set represented as an
+integer->boolean Judy array (Judy1).  The Judy1 requires roughly 6-20
+bytes per stored (64-bit) hash.  Memory efficiency varies as more
+hashes are added, but it converges to ca 6 bytes per hash.
+.PP
+Since a vast majority of the seen n-grams is typically unique, the number
+of stored hashes is close to the number of tokens in the input.  This has
+to be taken in account when processing large input.  For instance,
+processing a corpus of 10 billion words requires ca 60GB RAM.
+.PP
+Memory requirements can be reduced significantly by precomputing the hashes
+of duplicate n-grams (see
+.BR \-f ).
+.SH INPUT FORMAT
+The input must be in a vertical format, i.e. each token or a structural
+tag on a separate line.
+.SH SAMPLE INPUT
+.nf
+<doc id="doc1">
+<p>
+This
+is
+the
+first
+paragraph.
+</p>
+<p>
+Second
+paragraph.
+</p>
+</doc>
+.fi
+.SH EXAMPLE
+.nf
+mkdir tmp/
+hashgen -n7 -o tmp/7gram_hashes. corpus.vert
+hashdup -o tmp/dup_7gram_hashes tmp/7gram_hashes.* 
+onion -s -n7 -f tmp/dup_7gram_hashes corpus.vert > corpus-deduped.vert
+rm -rf tmp/
+.fi
+.SH SEE ALSO
+.BR hashgen (1),
+.BR hashdup (1)
+.SH AUTHOR
+Jan Pomikalek <jan.pomikalek@gmail.com>

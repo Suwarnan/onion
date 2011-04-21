@@ -1,0 +1,50 @@
+.TH HASHGEN 1
+.SH NAME
+hashgen \- generate hashes of n-grams
+.SH SYNOPSIS
+.B hashgen
+.RI [ OPTIONS ]
+.RI [ FILE ]
+.SH DESCRIPTION
+.B Hashgen
+generates 64-bit hashes of the tuples (n-grams) of tokens in the named input
+.I FILE
+(or standard input if no files are named, or the file name
+.B \-
+is given).
+The hashes are written to multiple files.  The hash space is evenly divided
+into ranges each of which is mapped to a single output file.  This guarantees
+that two equal hashes always end up in the same output file.
+.PP
+The output files are binary.  Each hash is stored on 8 bytes.
+.SH OPTIONS
+.TP
+.BI \-n " NUM"
+The number of tokens in each tuple (n-gram).
+.TP
+.BI \-o " STR"
+The prefix of the output files.  Numbers from 0 to (number_of_files - 1) are
+appended to the prefix to form the names of the output files.
+.TP
+.BI \-c " NUM"
+The number of output files.
+.TP
+.B \-q
+Quiet; do not print any progress information to standard error output.
+.TP
+.B \-V
+Print version information and exit.
+.TP
+.B \-h
+Print help information and exit.
+.SH EXIT STATUS
+.B Hashgen
+exits 0 on success, and >0 if an error occurs.
+.SH INPUT FORMAT
+The input format is the same as for
+.BR onion (1).
+.SH SEE ALSO
+.BR onion (1),
+.BR hashdup (1)
+.SH AUTHOR
+Jan Pomikalek <jan.pomikalek@gmail.com>
