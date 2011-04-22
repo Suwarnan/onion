@@ -46,7 +46,7 @@ long int Input_size;
 void print_usage(FILE *stream) {
     fprintf(stream, "\
 Usage: onion [OPTIONS] [FILE]\n\
-Mark duplicate text parts in the input.\n\
+Mark duplicate text parts in the input vertical file.\n\
 \n\
  -f FILE   hashes of duplicate n-grams\n\
  -n NUM    n-gram length (default: %i)\n\
@@ -63,7 +63,7 @@ Mark duplicate text parts in the input.\n\
  -h        display this help and exit\n\
 \n\
 With no FILE, or when FILE is -, read standard input.\n\
-Output is written to standard outout.\n\
+Output is written to standard output.\n\
 \n\
 Project home page: <http://code.google.com/p/onion/>\n",
         NGRAM_SIZE, DUPL_THRES, DOC_TAG, PAR_TAG,
