@@ -10,6 +10,8 @@
 #define BUZHASH_H
 #define BUZHASH_MAX 18446744073709551615ul
 
+#include <stdint.h>
+
 typedef uint64_t hash_t;
 typedef struct {
     int size;
