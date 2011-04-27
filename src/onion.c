@@ -366,7 +366,7 @@ int main(int argc, char **argv) {
             // is there at least one good paragraph?
             int all_bad = 1;
             for (par_i=docs[doc_i]; par_i<docs[doc_i+1]; par_i++) {
-                if (!bad_par[par_i]) {
+                if (!bad_par[par_i] && par_len[par_i] > 0) {
                     all_bad = 0;
                     break;
                 }
@@ -381,14 +381,15 @@ int main(int argc, char **argv) {
                 int tok_i;
                 for (tok_i=pars[par_i]; tok_i<pars[par_i+1]; tok_i++) {
                     char* token = tokens[tok_i];
-                    // preserve tags at document boundaries
                     int bad_token = bad_par[par_i];
-                    if (tok_i == first_token && !all_bad && 
+                    // tags at document boundaries are preserved if there is
+                    // at least one good paragraph, removed otherwise
+                    if (tok_i == first_token && 
                             strncmp(token, doc_tag, doc_tag_len) == 0)
-                        bad_token = 0;
-                    if (tok_i == last_token && !all_bad &&
+                        bad_token = all_bad;
+                    if (tok_i == last_token &&
                             strcmp(token, doc_end_tag) == 0)
-                        bad_token = 0;
+                        bad_token = all_bad;
                     // print output
                     if (Strip_dupl) {
                         if (!bad_token)
