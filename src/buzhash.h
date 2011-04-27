@@ -10,7 +10,7 @@
 #define BUZHASH_H
 #define BUZHASH_MAX 18446744073709551615ul
 
-typedef unsigned long hash_t;
+typedef uint64_t hash_t;
 typedef struct {
     int size;
     hash_t *elems;
