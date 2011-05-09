@@ -20,6 +20,7 @@
 
 #define EOL '\n'
 #define STDIN 0
+#define BITMASK_HIGH63 0xfffffffffffffffeul
 
 #define NGRAM_SIZE 5
 #define DUPL_THRES 0.5
@@ -205,11 +206,10 @@ int main(int argc, char **argv) {
     // ljudy - for local (document level) duplicates
     Pvoid_t ljudy = (Pvoid_t) NULL;
 
-    // djudy - for hashes of duplicate n-grams (optional)
-    Pvoid_t djudy = (Pvoid_t) NULL;
-
     // read hashes of duplicate n-grams if available
+    int have_dupl_ngrams = 0;
     if (Dupl_hashes_path != NULL) {
+        have_dupl_ngrams = 1;
         errno = 0;
         FILE* ngrams_fp = fopen(Dupl_hashes_path, "r");
         if (errno != 0) {
@@ -224,7 +224,9 @@ int main(int argc, char **argv) {
         hash_t hash;
         while (fread(&hash, sizeof(hash), 1, ngrams_fp)) {
             bytes_read+= sizeof(hash);
-            J1S(judy_rc, djudy, hash);
+            // store only the 63 most significant bits of the hash;
+            // reserve the last bit as a flag (seen / unseen)
+            J1S(judy_rc, judy, hash & BITMASK_HIGH63);
 
             // print progress information
             if (!Quiet && bytes_read % (10000000 * sizeof(hash)) == 0) {
@@ -325,8 +327,14 @@ int main(int argc, char **argv) {
                     if (!buzhash_is_full_buffer(&bh_buffer))
                         continue;
                     J1T(judy_rc, ljudy, hash);
-                    if (!judy_rc)
-                        J1T(judy_rc, judy, hash);
+                    if (!judy_rc) {
+                        if (have_dupl_ngrams)
+                            // test with the last bit set to 1
+                            // (check against already seen duplicate ngrams)
+                            J1T(judy_rc, judy, hash | 1);
+                        else
+                            J1T(judy_rc, judy, hash);
+                    }
                     if (judy_rc) {
                         bad_tokens+= NGRAM_SIZE - prev_bad_tokens;
                         prev_bad_tokens = Ngram_size;
@@ -405,15 +413,18 @@ int main(int argc, char **argv) {
                     if (!buzhash_is_full_buffer(&bh_buffer))
                         continue;
                     if (!bad_par[par_i]) {
-                        if (djudy != NULL) {
-                            // if we have the list of all duplicate n-grams,
-                            // we want to ignore the unique ones
-                            J1T(judy_rc, djudy, hash);
+                        if (have_dupl_ngrams) {
+                            // If we have the list of hashes of all duplicate
+                            // n-grams, we set the least significant bit of the
+                            // stored hash to 1 if we have seen the matching
+                            // duplicate n-gram to indicate it has been seen.
+                            // Unique n-grams are ignored.
+                            J1U(judy_rc, judy, hash & BITMASK_HIGH63);
                             if (judy_rc)
-                                J1S(judy_rc, judy, hash); 
+                                J1S(judy_rc, judy, hash | 1); 
                         }
                         else {
-                            // otherwise we have to store all n-grams
+                            // otherwise we have to store hashes of all n-grams
                             J1S(judy_rc, judy, hash); 
                         }
                     }
