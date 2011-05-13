@@ -151,13 +151,22 @@ int main(int argc, char **argv) {
     while (fgets(line, MAX_LINE_LENGTH, Input)) {
         // read line and strip trailing newline
         line_number++;
-        processed_bytes+= strlen(line);
+        int linelen = strlen(line);
         char* newline_pointer = strchr(line, '\n');
         if (newline_pointer == NULL) {
-            fprintf(stderr, "Error: line %li too long.\n", line_number);
-            return 1;
+            if (linelen >= MAX_LINE_LENGTH - 1)
+                fprintf(stderr, "Warning: line %li too long; "
+                        "processing only first %i chars.\n", line_number,
+                        linelen);
+            else
+                fprintf(stderr, "Warning: line %li contains a NUL character; "
+                        "processing only the first %i chars.\n", line_number,
+                        linelen);
         }
-        *newline_pointer = '\0';
+        else {
+            *newline_pointer = '\0';
+        }
+        processed_bytes+= linelen;
 
         // skip lines starting with <
         if (line[0] == '<')
