@@ -69,6 +69,18 @@ document start/end--are also marked as duplicated.  The
 .B \-m
 option disables this.
 .TP
+.BI \-T " NUM"
+Trim the hashes of n-grams to NUM least significant bits. By default, 64-bit
+n-ngram hashes are stored in a Judy array. Using shorter hashes may reduce
+memory requirements up to one half under certain circumstances. This may
+apply even if the hash length is reduced only slightly (e.g. from 64 to 60
+bits) since it affects how efficiently the data is stored.  The optimal hash
+length depends on the number of records stored in the Judy and thus on the
+size of the processed data. Finding the right settings may require a bit
+of experimenting. Please note that using too short hashes will cause hash
+collisions and may harm the accuracy of the algorithm.  Recommended value
+is between 40 and 64.
+.TP
 .BI \-l " NUM"
 The maximal length of a stub (in tokens).  This is the maximal
 length of a continuous sequence of paragraphs which can be removed as
@@ -110,7 +122,9 @@ processing a corpus of 10 billion words requires ca 60GB RAM.
 .PP
 Memory requirements can be reduced significantly by precomputing the hashes
 of duplicate n-grams (see
-.BR \-f ).
+.BR \-f )
+and/or by using shorter hashes (see
+.BR \-T ).
 .SH INPUT FORMAT
 The input must be in a vertical format, i.e. each token or a structural
 tag on a separate line.

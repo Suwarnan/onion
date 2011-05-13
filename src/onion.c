@@ -24,7 +24,7 @@
 #define DUPL_THRES 0.5
 #define DOC_TAG "doc"
 #define PAR_TAG "p"
-#define STRIP_DUPL 0
+#define TRIM_HASHES 64
 #define MAX_STUB_LENGTH 20
 #define BUFFER_SIZE 16777216
 
@@ -35,6 +35,7 @@ char* Doc_tag = DOC_TAG;
 char* Par_tag = PAR_TAG;
 int Strip_dupl = 0;
 int No_smoothing = 0;
+int Trim_hashes = TRIM_HASHES;
 int Max_stub_length = MAX_STUB_LENGTH;
 long Buffer_size = BUFFER_SIZE;
 int Quiet = 0;
@@ -54,6 +55,7 @@ Mark duplicate text parts in the input vertical file.\n\
  -p STR    paragraph tag (default: %s)\n\
  -s        strip duplicate parts (rather than mark)\n\
  -m        no smoothing\n\
+ -T NUM    trim n-gram hashes to NUM bits (default: %i)\n\
  -l NUM    max stub length (default: %i)\n\
  -b NUM    buffer size, in bytes (default: %i)\n\
  -q        quiet; suppress all output except for errors\n\
@@ -66,7 +68,7 @@ Output is written to standard output.\n\
 \n\
 Project home page: <http://code.google.com/p/onion/>\n",
         NGRAM_SIZE, DUPL_THRES, DOC_TAG, PAR_TAG,
-        MAX_STUB_LENGTH, BUFFER_SIZE);
+        TRIM_HASHES, MAX_STUB_LENGTH, BUFFER_SIZE);
 }
 
 void print_progress(char* task_descr, unsigned long int processed_bytes,
@@ -87,7 +89,7 @@ int main(int argc, char **argv) {
     // get options
     int c;
     char *endptr;
-    while ((c = getopt(argc, argv, "f:n:t:d:p:sml:b:qVh")) != -1) {
+    while ((c = getopt(argc, argv, "f:n:t:d:p:smT:l:b:qVh")) != -1) {
         errno = 0;
         switch (c) {
             case 'f':
@@ -120,6 +122,14 @@ int main(int argc, char **argv) {
                 break;
             case 'm':
                 No_smoothing = 1;
+                break;
+            case 'T':
+                Trim_hashes = strtol(optarg, &endptr, 10);
+                if (errno != 0 || *endptr != '\0') {
+                    fprintf(stderr, "Integer value expected for -T, got: %s\n", optarg);
+                    print_usage(stderr);
+                    return 1;
+                }
                 break;
             case 'l':
                 Max_stub_length = strtol(optarg, &endptr, 10);
@@ -181,6 +191,12 @@ int main(int argc, char **argv) {
     int doc_tag_len = strlen(doc_tag);
     int par_tag_len = strlen(par_tag);
 
+    // bitmask for trimming ngram hashes
+    hash_t hash_bitmask = 0xfffffffffffffffful;
+    int bitshift = 64 - Trim_hashes;
+    if (bitshift > 0)
+        hash_bitmask >>= bitshift;
+
     // data structures
     int buffer_size;
     int buffer_content = 0;
@@ -193,7 +209,6 @@ int main(int argc, char **argv) {
     int token_count, par_count, doc_count;
 
     // buzhash
-    hash_t hash;
     buzhash_buffer_t bh_buffer;
     buzhash_init_buffer(&bh_buffer, Ngram_size);
 
@@ -222,9 +237,10 @@ int main(int argc, char **argv) {
         hash_t hash;
         while (fread(&hash, sizeof(hash), 1, ngrams_fp)) {
             bytes_read+= sizeof(hash);
+            hash_t masked_hash = hash & hash_bitmask;
             // store only the 63 most significant bits of the hash;
             // reserve the last bit as a flag (seen / unseen)
-            J1S(judy_rc, judy, hash & BITMASK_HIGH63);
+            J1S(judy_rc, judy, masked_hash & BITMASK_HIGH63);
 
             // print progress information
             if (!Quiet && bytes_read % (10000000 * sizeof(hash)) == 0) {
@@ -321,7 +337,8 @@ int main(int argc, char **argv) {
                     prev_bad_tokens--;
                     if (prev_bad_tokens < 0)
                         prev_bad_tokens = 0;
-                    hash = buzhash(token, &bh_buffer);
+                    hash_t hash = buzhash(token, &bh_buffer);
+                    hash_t masked_hash = hash & hash_bitmask;
                     if (!buzhash_is_full_buffer(&bh_buffer))
                         continue;
                     J1T(judy_rc, ljudy, hash);
@@ -329,9 +346,9 @@ int main(int argc, char **argv) {
                         if (have_dupl_ngrams)
                             // test with the last bit set to 1
                             // (check against already seen duplicate ngrams)
-                            J1T(judy_rc, judy, hash | 1);
+                            J1T(judy_rc, judy, masked_hash | 1);
                         else
-                            J1T(judy_rc, judy, hash);
+                            J1T(judy_rc, judy, masked_hash);
                     }
                     if (judy_rc) {
                         bad_tokens+= NGRAM_SIZE - prev_bad_tokens;
@@ -407,7 +424,8 @@ int main(int argc, char **argv) {
                     if (token[0] == '<')
                         continue;
                     // store hashes of n-grams
-                    hash = buzhash(token, &bh_buffer);
+                    hash_t hash = buzhash(token, &bh_buffer);
+                    hash_t masked_hash = hash & hash_bitmask;
                     if (!buzhash_is_full_buffer(&bh_buffer))
                         continue;
                     if (!bad_par[par_i]) {
@@ -417,13 +435,13 @@ int main(int argc, char **argv) {
                             // stored hash to 1 if we have seen the matching
                             // duplicate n-gram to indicate it has been seen.
                             // Unique n-grams are ignored.
-                            J1U(judy_rc, judy, hash & BITMASK_HIGH63);
+                            J1U(judy_rc, judy, masked_hash & BITMASK_HIGH63);
                             if (judy_rc)
-                                J1S(judy_rc, judy, hash | 1); 
+                                J1S(judy_rc, judy, masked_hash | 1); 
                         }
                         else {
                             // otherwise we have to store hashes of all n-grams
-                            J1S(judy_rc, judy, hash); 
+                            J1S(judy_rc, judy, masked_hash); 
                         }
                     }
                 }
