@@ -18,8 +18,6 @@
 #include "buzhash.h"
 #include "version.h"
 
-#define EOL '\n'
-#define STDIN 0
 #define BITMASK_HIGH63 0xfffffffffffffffeul
 
 #define NGRAM_SIZE 5
@@ -251,7 +249,7 @@ int main(int argc, char **argv) {
         // find tokens
         token_count = 0;
         tokens[token_count++] = buffer_pos++;
-        while ((buffer_pos = strchr(buffer_pos, EOL)) != NULL) {
+        while ((buffer_pos = strchr(buffer_pos, '\n')) != NULL) {
             buffer_pos[0] = '\0';
             tokens[token_count++] = ++buffer_pos;
         }
@@ -443,7 +441,7 @@ int main(int argc, char **argv) {
             // replace \0s with EOLs (revert the buffer contents to original)
             for (pos=last_doc_fst_tok; pos<buffer_end; pos++)
                 if (pos[0] == '\0')
-                    pos[0] = EOL;
+                    pos[0] = '\n';
             // print progress information
             if (!Quiet) {
                 float percent_done = -1;
