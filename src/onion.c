@@ -6,7 +6,6 @@
  * you should have received as part of this distribution.            *
  *********************************************************************/
 
-#define _GNU_SOURCE
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -182,11 +181,12 @@ int main(int argc, char **argv) {
     unsigned long int total_processed_bytes = 0;
 
     // patterns
-    char *doc_tag=NULL, *doc_end_tag=NULL;
-    char *par_tag=NULL;
-    asprintf(&doc_tag, "<%s", Doc_tag);
-    asprintf(&doc_end_tag, "</%s>", Doc_tag);
-    asprintf(&par_tag, "<%s", Par_tag);
+    char *doc_tag = (char*) malloc((strlen(Doc_tag) + 1 + 1) * sizeof(char));
+    strcat(strcpy(doc_tag, "<"), Doc_tag);
+    char *doc_end_tag = (char*) malloc((strlen(Doc_tag) + 3 + 1) * sizeof(char));
+    strcat(strcat(strcpy(doc_end_tag, "</"), Doc_tag), ">");
+    char *par_tag = (char*) malloc((strlen(Par_tag) + 1 + 1) * sizeof(char));
+    strcat(strcpy(par_tag, "<"), Par_tag);
 
     int doc_tag_len = strlen(doc_tag);
     int par_tag_len = strlen(par_tag);
@@ -198,7 +198,7 @@ int main(int argc, char **argv) {
         hash_bitmask >>= bitshift;
 
     // data structures
-    int buffer_size;
+    int buffer_size = 0;
     int buffer_content = 0;
     char* buffer = (char*) malloc((Buffer_size+1) * sizeof(char));
     char** tokens = (char**) malloc((Buffer_size+1) * sizeof(char*));

@@ -1,7 +1,7 @@
 include ../Makefile.config
 
 CC=gcc
-CFLAGS=-Wall $(JUDY_INC)
+CFLAGS=-Wall -O3 $(JUDY_INC)
 LIBS=$(JUDY_LIB) -lJudy 
 
 OBJS=version.o buzhash.o
