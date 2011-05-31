@@ -6,7 +6,6 @@
  * you should have received as part of this distribution.            *
  *********************************************************************/
 
-#define _GNU_SOURCE
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -118,18 +117,19 @@ int main(int argc, char **argv) {
 
     // output files
     FILE** output_files = (FILE**) malloc(Output_count * sizeof(FILE*));
+    char* filename = (char*) malloc(
+            (strlen(Output_prefix) + (Output_count/10+1) + 1) * sizeof(char));
     int i;
     for (i=0; i<Output_count; i++) {
-        char* filename = NULL;
-        asprintf(&filename, "%s%i", Output_prefix, i);
+        sprintf(filename, "%s%i", Output_prefix, i);
         errno = 0;
         output_files[i] = fopen(filename, "w");
         if (errno != 0) {
             fprintf(stderr, "Unable to open %s for writing.\n", filename);
             return 1;
         }
-        free(filename);
     }
+    free(filename);
 
     // hash range boundaries
     hash_t* range_boundaries = (hash_t*) malloc(Output_count * sizeof(hash_t));
