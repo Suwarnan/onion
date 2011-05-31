@@ -324,7 +324,7 @@ int main(int argc, char **argv) {
                  * n-grams.
                  *
                  * At the beginning of a new paragraph we need to pretend that
-                 * there are NGRAM_SIZE prev_bad_tokens so that the leading
+                 * there are Ngram_size prev_bad_tokens so that the leading
                  * bad n-grams do not generate too many bod tokens. */
                 int prev_bad_tokens = Ngram_size;
                 // for all tokens in the paragraph
@@ -351,7 +351,7 @@ int main(int argc, char **argv) {
                             J1T(judy_rc, judy, masked_hash);
                     }
                     if (judy_rc) {
-                        bad_tokens+= NGRAM_SIZE - prev_bad_tokens;
+                        bad_tokens+= Ngram_size - prev_bad_tokens;
                         prev_bad_tokens = Ngram_size;
                     } 
                     J1S(judy_rc, ljudy, hash);
