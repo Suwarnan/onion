@@ -343,12 +343,14 @@ int main(int argc, char **argv) {
                         continue;
                     J1T(judy_rc, ljudy, hash);
                     if (!judy_rc) {
-                        if (have_dupl_ngrams)
+                        if (have_dupl_ngrams) {
                             // test with the last bit set to 1
                             // (check against already seen duplicate ngrams)
                             J1T(judy_rc, judy, masked_hash | 1);
-                        else
+                        }
+                        else {
                             J1T(judy_rc, judy, masked_hash);
+                        }
                     }
                     if (judy_rc) {
                         bad_tokens+= Ngram_size - prev_bad_tokens;
