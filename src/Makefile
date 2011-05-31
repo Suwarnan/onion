@@ -11,7 +11,7 @@ all: $(TARGETS)
 $(TARGETS): $(OBJS)
 
 %.o: %.c %.h
-	$(CC) $(CFLAGS) -c $< $(LIBS)
+	$(CC) $(CFLAGS) -c $< 
 
 %: %.c
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
