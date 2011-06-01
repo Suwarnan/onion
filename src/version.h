@@ -6,5 +6,5 @@
  * you should have received as part of this distribution.            *
  *********************************************************************/
 
-#define VERSION "1.0"
+#define VERSION "1.1"
 void print_version(const char* progname);
