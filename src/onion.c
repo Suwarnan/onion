@@ -277,13 +277,13 @@ int main(int argc, char **argv) {
         pars[par_count++] = 0;
         int i;
         for (i=1; i<token_count; i++) {
-            if (strncmp(tokens[i], par_tag, par_tag_len) == 0 &&
-                    (tokens[i][par_tag_len] == ' ' || tokens[i][par_tag_len] == '>')) {
-                pars[par_count++] = i;
-            }
-            else if (strncmp(tokens[i], doc_tag, doc_tag_len) == 0 &&
+            if (strncmp(tokens[i], doc_tag, doc_tag_len) == 0 &&
                     (tokens[i][doc_tag_len] == ' ' || tokens[i][doc_tag_len] == '>')) {
                 docs[doc_count++] = par_count;
+                pars[par_count++] = i;
+            }
+            else if (strncmp(tokens[i], par_tag, par_tag_len) == 0 &&
+                    (tokens[i][par_tag_len] == ' ' || tokens[i][par_tag_len] == '>')) {
                 pars[par_count++] = i;
             }
         }
