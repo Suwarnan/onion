@@ -144,6 +144,27 @@ paragraph.
 </p>
 </doc>
 .fi
+.SH STRUCTURAL MARK-UP
+All lines starting with the lower than character (<) are considered mark-up
+and are skipped when building n-grams. Document and paragraph tags
+(see
+.B \-d 
+and
+.BR \-p )
+denote the de-duplicated units. A paragraph is an atomic unit. It is always
+either preserved or removed as a whole. Empty documents and documents 
+containing only duplicate paragraphs are removed.
+.PP
+Any text chunk not enclosed within document tags is also considered a document.
+For instance "A<doc>B</doc>C<doc>D</doc>E" contains five documents A, B, C, D,
+and E. Similarly with paragraphs. The following document contains three 
+paragraphs: "<doc>P1<p>P2</p>P3</doc>". (The examples are intentionally
+condensed. Actual input must be in a vertical format. See above.)
+.PP
+Document and paragraph tags are only recognised in a simplified format. Lines
+denoting opening tags must start with "<tag>" or "<tag ". Lines denoting 
+closing tags must start with "</tag>". No leading or interleaving spaces are
+allowed.
 .SH EXAMPLE
 .nf
 mkdir tmp/

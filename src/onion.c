@@ -187,9 +187,13 @@ int main(int argc, char **argv) {
     strcat(strcat(strcpy(doc_end_tag, "</"), Doc_tag), ">");
     char *par_tag = (char*) malloc((strlen(Par_tag) + 1 + 1) * sizeof(char));
     strcat(strcpy(par_tag, "<"), Par_tag);
+    char *par_end_tag = (char*) malloc((strlen(Par_tag) + 3 + 1) * sizeof(char));
+    strcat(strcat(strcpy(par_end_tag, "</"), Par_tag), ">");
 
     int doc_tag_len = strlen(doc_tag);
+    int doc_end_tag_len = strlen(doc_end_tag);
     int par_tag_len = strlen(par_tag);
+    int par_end_tag_len = strlen(par_end_tag);
 
     // bitmask for trimming ngram hashes
     hash_t hash_bitmask = 0xfffffffffffffffful;
@@ -275,16 +279,30 @@ int main(int argc, char **argv) {
         par_count = 0;
         docs[doc_count++] = 0;
         pars[par_count++] = 0;
+        int start_doc_next = 0;
+        int start_par_next = 0;
         int i;
         for (i=1; i<token_count; i++) {
-            if (strncmp(tokens[i], doc_tag, doc_tag_len) == 0 &&
-                    (tokens[i][doc_tag_len] == ' ' || tokens[i][doc_tag_len] == '>')) {
+            // "<doc>" or "<doc "
+            if (start_doc_next || (strncmp(tokens[i], doc_tag, doc_tag_len) == 0 &&
+                    (tokens[i][doc_tag_len] == ' ' || tokens[i][doc_tag_len] == '>'))) {
                 docs[doc_count++] = par_count;
                 pars[par_count++] = i;
+                start_doc_next = 0;
             }
-            else if (strncmp(tokens[i], par_tag, par_tag_len) == 0 &&
-                    (tokens[i][par_tag_len] == ' ' || tokens[i][par_tag_len] == '>')) {
+            // "</doc>"
+            else if (strncmp(tokens[i], doc_end_tag, doc_end_tag_len) == 0) {
+                start_doc_next = 1;
+            }
+            // "<p>" or "<p "
+            else if (start_par_next || (strncmp(tokens[i], par_tag, par_tag_len) == 0 &&
+                    (tokens[i][par_tag_len] == ' ' || tokens[i][par_tag_len] == '>'))) {
                 pars[par_count++] = i;
+                start_par_next = 0;
+            }
+            // "</p>"
+            else if (strncmp(tokens[i], par_end_tag, par_end_tag_len) == 0) {
+                start_par_next = 1;
             }
         }
 
