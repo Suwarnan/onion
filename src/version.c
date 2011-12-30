@@ -7,9 +7,25 @@
  *********************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "version.h"
 
+int svnrev_to_int(const char* svnrev) {
+    // find the index of the first digit
+    int i = 0;
+    while (svnrev[i] < '0' ||  svnrev[i] > '9')
+        i++;
+    // convert to int
+    return (int)strtol(svnrev+i, (char**)NULL, 10);
+}
+
 void print_version(const char* progname) {
-    printf("%s: onion v%s\n\n", progname, VERSION);
+    printf("%s: onion ", progname);
+    if (strcmp(VERSION, "svn") == 0)
+        printf("rev%i", svnrev_to_int(REVISION));
+    else
+        printf("v%s", VERSION);
+    printf("\n\n");
     printf("Copyright (c) 2011 Jan Pomikalek <jan.pomikalek@gmail.com>\n");
 }

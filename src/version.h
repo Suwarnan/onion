@@ -6,5 +6,6 @@
  * you should have received as part of this distribution.            *
  *********************************************************************/
 
-#define VERSION "1.1"
+#define VERSION "svn"
+#define REVISION "$Rev$"
 void print_version(const char* progname);

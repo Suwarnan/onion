@@ -1,6 +1,8 @@
 include Makefile.config
 
 VERSION=$(shell grep define\ VERSION\  src/version.h | cut -f2 -d\")
+REVISION=$(shell grep define\ REVISION\  src/version.h | grep -o "[0-9]\{1,\}")
+PACKAGE_NAME=$(shell if [ $(VERSION) = "svn" ]; then echo "onion-$(VERSION)-r$(REVISION)"; else echo "onion-$(VERSION)"; fi)
 
 all:
 	cd src && make
@@ -12,10 +14,9 @@ install:
 clean:
 	cd src && make clean
 
-PACKAGE_NAME=onion-$(VERSION)
 dist:
 	rm -rf packages/$(PACKAGE_NAME)/ packages/$(PACKAGE_NAME).tar.gz
 	mkdir -p packages/$(PACKAGE_NAME)/src/
 	cp src/*.c src/*.h src/Makefile packages/$(PACKAGE_NAME)/src/
 	cp -r Makefile Makefile.config COPYING README doc packages/$(PACKAGE_NAME)/
-	cd packages && tar czvf $(PACKAGE_NAME).tar.gz $(PACKAGE_NAME)/
+	cd packages && tar --exclude='.svn' -czvf $(PACKAGE_NAME).tar.gz $(PACKAGE_NAME)/
