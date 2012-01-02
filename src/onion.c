@@ -19,7 +19,7 @@
 
 #define BITMASK_HIGH63 0xfffffffffffffffeul
 
-#define NGRAM_SIZE 5
+#define NGRAM_SIZE 7
 #define DUPL_THRES 0.5
 #define DOC_TAG "doc"
 #define PAR_TAG "p"
