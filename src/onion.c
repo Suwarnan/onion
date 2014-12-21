@@ -29,7 +29,7 @@
 
 // options
 int Ngram_size = NGRAM_SIZE;
-float Dupl_thresh = DUPL_THRES;
+float Dupl_thres = DUPL_THRES;
 char* Doc_tag = DOC_TAG;
 char* Par_tag = PAR_TAG;
 int Strip_dupl = 0;
@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
                 }
                 break;
             case 't':
-                Dupl_thresh = strtod(optarg, &endptr);
+                Dupl_thres = strtod(optarg, &endptr);
                 if (errno != 0 || *endptr != '\0') {
                     fprintf(stderr, "Float value expected for -t, got: %s\n", optarg);
                     print_usage(stderr);
@@ -382,7 +382,7 @@ int main(int argc, char **argv) {
 
                 // mark bad paragraphs
                 bad_par[par_i] = (total_tokens > 0 &&
-                        1.0 * bad_tokens / total_tokens > DUPL_THRES);
+                        1.0 * bad_tokens / total_tokens > Dupl_thres);
             }
 
             // smoothing
