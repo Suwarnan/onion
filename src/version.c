@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2011 Jan Pomikalek                                  *
+ * Copyright (c) 2011-2015 Jan Pomikalek                             *
  * All rights reserved.                                              *
  *                                                                   *
  * This software is licensed as described in the file COPYING, which *
@@ -27,5 +27,5 @@ void print_version(const char* progname) {
     else
         printf("v%s", VERSION);
     printf("\n\n");
-    printf("Copyright (c) 2011 Jan Pomikalek <jan.pomikalek@gmail.com>\n");
+    printf("Copyright (c) 2011-2015 Jan Pomikalek <jan.pomikalek@gmail.com>\n");
 }

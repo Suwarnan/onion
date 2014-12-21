@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2011 Jan Pomikalek                                  *
+ * Copyright (c) 2011-2015 Jan Pomikalek                             *
  * All rights reserved.                                              *
  *                                                                   *
  * This software is licensed as described in the file COPYING, which *
